@@ -1,0 +1,21 @@
+FROM golang:1.18.3-alpine as builder
+
+ENV GO111MODULE=on
+WORKDIR /go/src/github.com/inpulse-tv/docker-optimisation/
+
+RUN apk update && \
+    apk add --virtual ca-certificates 
+
+COPY go.mod ./
+COPY go.sum ./
+COPY main.go ./
+
+RUN go mod download && \
+    go build -o app main.go
+
+FROM alpine:3.16
+WORKDIR /root/
+
+COPY --from=builder /go/src/github.com/inpulse-tv/docker-optimisation/app .
+
+CMD [ "./app" ]
